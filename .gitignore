@@ -1,0 +1,14 @@
+*~
+*.tgz
+.*.sw*
+.DS_Store
+# Python
+*.pyc
+*.egg-info
+__pycache__
+/venv
+/htmlcov
+/dist
+/TODO
+.coverage
+.tox
