@@ -18,9 +18,11 @@ __brew_done() {
   brew audit $formula
 
   cd $HOMEBREW_PREFIX
+  git checkout master  # just in case
   git checkout -b "${formula}-${change}"
   git add Library/Formula/${formula}.rb
   git commit
   git push -u git@github.com:`git config github.user`/homebrew $branch
+  git checkout master
 }
 __brew_done $*
