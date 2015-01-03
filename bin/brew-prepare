@@ -1,0 +1,22 @@
+#! /bin/bash -e
+
+# brew prepare: prepare for editing a formula, by printing some info about it,
+#               open its homepage and its source in your $EDITOR
+#
+# Usage:
+#     brew prepare <formula>
+__brew_prepare() {
+  local formula=$1
+
+  if [ "$(uname)" = "Darwin" ]; then
+    BROWSER=open brew home $formula
+  else
+    brew home $formula
+  fi
+  brew desc $formula 2>/dev/null || true
+  brew audit --strict $formula || true
+  echo "(press enter to edit this formula)"
+  read
+  brew edit $formula
+}
+__brew_prepare $*
