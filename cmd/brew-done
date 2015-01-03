@@ -31,12 +31,6 @@ __brew_done() {
   git push -u "git@github.com:$fork" "$branch"
   git checkout master
 
-  open_cmd="open 'https://github.com/$fork/compare/${branch}?expand=1'"
-
-  if [ "$(uname)" -eq "Darwin" ]; then
-    $open_cmd
-  else
-    echo "$open_cmd"
-  fi
+  open "https://github.com/$fork/compare/${branch}?expand=1"
 }
 __brew_done $*
