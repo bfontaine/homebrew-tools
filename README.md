@@ -17,6 +17,8 @@ the Homebrew repo.
   checkout a new branch, let you write a commit message, push to your GitHub
   fork and open the pull request page in your browser. `<change>` should be a
   single word describing the change (e.g. `1.0.3`, `head`, `test`, etc).
+* `brew checkupdates`: check for formulae updates. It only supports
+  GitHub-hosted formulae for now.
 
 All tools assume your local repo is up to date (i.e. you run `brew
 update` regularly).
@@ -26,3 +28,12 @@ update` regularly).
 Tap this repository:
 
     brew tap bfontaine/tools
+
+### Dependencies
+
+* `brew-checkupdates` requires `nokogiri`: `gem install nokogiri`
+
+While that’s not required, you should also install [`brew-desc`][desc]:
+`brew tap telemachus/desc`
+
+[desc]: https://github.com/telemachus/homebrew-desc
