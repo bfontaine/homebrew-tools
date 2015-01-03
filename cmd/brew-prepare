@@ -8,11 +8,7 @@
 __brew_prepare() {
   local formula=$1
 
-  if [ "$(uname)" = "Darwin" ]; then
-    BROWSER=open brew home $formula
-  else
-    brew home $formula
-  fi
+  brew home $formula
   brew desc $formula 2>/dev/null || true
   brew audit --strict $formula || true
   echo "(press enter to edit this formula)"
