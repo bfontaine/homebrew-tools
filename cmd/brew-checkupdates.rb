@@ -51,7 +51,7 @@ module BrewCheckUpdates
 
   end
 
-  class Version
+  class Version  # TODO use Homebrew's version
     include Comparable
 
     attr_reader :major, :minor, :patch
@@ -204,6 +204,30 @@ module BrewCheckUpdates
 
     def check formula
       # TODO
+    end
+  end
+
+  class Homepage < Check
+    name 'Homepage'
+
+    def can_check formula
+      formula.homepage
+    end
+
+    def check formula
+      version_re = /\d{1,2}\.\d{1,2}(?:\.\d+)?(?:-\w+)/
+      version = formula.version
+      begin
+        open(formula.homepage) do |page|
+          page.read.scan(version_re) do |ver|
+            if Version.new(ver) > version
+              return [ver, nil]
+            end
+          end
+        end
+      rescue => e
+        puts "ERR: #{e}"
+      end
     end
   end
 
