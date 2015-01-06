@@ -18,7 +18,7 @@ __brew_done() {
   local open_cmd=
   local tmp=
 
-  brew audit $formula
+  brew audit --strict $formula
 
   cd $HOMEBREW_PREFIX
   git checkout master  # just in case
@@ -31,6 +31,7 @@ __brew_done() {
   git push -u "git@github.com:$fork" "$branch"
   git checkout master
 
+  sleep 0.2 # wait for GitHub to process the new stuff
   open "https://github.com/$fork/compare/${branch}?expand=1"
 }
 __brew_done $*
