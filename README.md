@@ -17,6 +17,8 @@ the Homebrew repo.
   checkout a new branch, let you write a commit message, push to your GitHub
   fork and open the pull request page in your browser. `<change>` should be a
   single word describing the change (e.g. `1.0.3`, `head`, `test`, etc).
+* `brew fixup <formula> <change>`: use it when you’ve modified a formula after
+  `brew done`.
 * `brew checkupdates`: check for formulae updates. It only supports
   GitHub-hosted formulae for now.
 

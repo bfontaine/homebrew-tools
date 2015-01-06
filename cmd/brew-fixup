@@ -17,6 +17,7 @@ __brew_fixup() {
   brew audit --strict $formula
 
   cd $HOMEBREW_PREFIX
+
   git checkout $branch
   git add Library/Formula/${formula}.rb
   git commit --amend --noedit
