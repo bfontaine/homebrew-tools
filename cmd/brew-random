@@ -1,0 +1,11 @@
+#! /bin/bash
+# print 5 random formulae
+# dependencies:
+#   brew install coreutils
+ls $(HOMEBREW_PREFIX)/Library/Formula/*.rb \
+  | grep -v -- '->' \
+  | cut -d/ -f3 \
+  | sed 's/\.rb$//' \
+  | gshuf \
+  | head -5 \
+  | xargs -n 1 brew desc
