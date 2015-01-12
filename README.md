@@ -21,6 +21,8 @@ the Homebrew repo.
   `brew done`.
 * `brew checkupdates`: check for formulae updates. It only supports
   GitHub-hosted formulae for now.
+* `brew random <n>`: prints `<n>` random formulae from the core repo (default
+  is 5).
 
 All tools assume your local repo is up to date (i.e. you run `brew
 update` regularly).
@@ -34,8 +36,6 @@ Tap this repository:
 ### Dependencies
 
 * `brew-checkupdates` requires `nokogiri`: `gem install nokogiri`
-
-While that’s not required, you should also install [`brew-desc`][desc]:
-`brew tap telemachus/desc`
+* `brew-random` requires [`brew-desc`][desc]: `brew tap telemachus/desc`
 
 [desc]: https://github.com/telemachus/homebrew-desc
