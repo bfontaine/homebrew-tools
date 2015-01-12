@@ -20,7 +20,7 @@ __brew_fixup() {
 
   git checkout $branch
   git add Library/Formula/${formula}.rb
-  git commit --amend --noedit
+  git commit --amend --no-edit
   git push -f "git@github.com:$fork"
   git checkout master
 
