@@ -23,8 +23,5 @@ __brew_fixup() {
   git commit --amend --no-edit
   git push -f "git@github.com:$fork"
   git checkout master
-
-  sleep 0.2 # wait for GitHub to process the new stuff
-  open "https://github.com/$fork/compare/${branch}?expand=1"
 }
 __brew_fixup $*
