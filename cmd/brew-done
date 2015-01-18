@@ -18,7 +18,7 @@ __brew_done() {
   local open_cmd=
   local tmp=
 
-  brew audit --strict $formula
+  [ -z "$BREW_DONE_SKIP_AUDIT" ] && brew audit --strict $formula
 
   cd $HOMEBREW_PREFIX
   git checkout master  # just in case
