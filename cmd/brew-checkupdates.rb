@@ -1,19 +1,19 @@
 #! /usr/bin/env ruby
 # -*- coding: UTF-8 -*-
 
-require 'pathname'
-require 'open-uri'
+require "pathname"
+require "open-uri"
 
-# need to be installed with 'gem'
-require 'nokogiri'
+# need to be installed with "gem"
+require "nokogiri"
 
 module BrewCheckUpdates
 
   class Checker
 
     def initialize(checks, **flags)
-      homebrew_prefix = Object.const_defined?('HOMEBREW_PREFIX') \
-                          ? HOMEBREW_PREFIX : '/usr/local'
+      homebrew_prefix = Object.const_defined?("HOMEBREW_PREFIX") \
+                          ? HOMEBREW_PREFIX : "/usr/local"
 
       @prefix = "#{homebrew_prefix}/Library/Formula"
       @checks = checks.map { |c| [c.name, c.new] }
@@ -28,9 +28,9 @@ module BrewCheckUpdates
 
     def check_formula path
       return if File.symlink? path # no tap for now
-      basename = Pathname.new(path).basename.to_s.sub(/\.rb$/, '')
+      basename = Pathname.new(path).basename.to_s.sub(/\.rb$/, "")
       name = basename.capitalize.gsub(/[-_\.](.)/) { $1.upcase } \
-                                .gsub(/\+/, 'x')
+                                .gsub(/\+/, "x")
 
       require path
       formula = Object.const_get(name)
@@ -125,7 +125,7 @@ module BrewCheckUpdates
   end
 
   class GitHubCheck < Check
-    name 'GitHub'
+    name "GitHub"
 
     @@gh_re = %r(^(https?://github\.com/.+?/.+?/))
 
@@ -142,7 +142,7 @@ module BrewCheckUpdates
       return if page.nil?
 
       # take only the first tag/release in the page
-      tags = ['.tag-name', '.tag-references .css-truncate-target'].map do |t|
+      tags = [".tag-name", ".tag-references .css-truncate-target"].map do |t|
         page.css(t).first
       end.compact.map(&:text)
 
@@ -159,7 +159,7 @@ module BrewCheckUpdates
   end
 
   class SourceForgeCheck < Check
-    name 'SourceForge'
+    name "SourceForge"
 
     def can_check formula
       formula.stable.url =~ %r(^https?://downloads\.sourceforge\.net/)
@@ -171,7 +171,7 @@ module BrewCheckUpdates
   end
 
   class GoogleCodeCheck < Check
-    name 'Google Code'
+    name "Google Code"
 
     def can_check formula
       formula.stable.url =~ %r(^https?://code\.google\.com/) or
@@ -184,7 +184,7 @@ module BrewCheckUpdates
   end
 
   class BitBucketCheck < Check
-    name 'BitBucket'
+    name "BitBucket"
 
     def can_check formula
       formula.stable.url =~ %r(^https?://bitbucket\.org/)
@@ -196,7 +196,7 @@ module BrewCheckUpdates
   end
 
   class GnomeFtp < Check
-    name 'GNOME FTP'
+    name "GNOME FTP"
 
     def can_check formula
       formula.stable.url =~ %r(^http://ftp\.gnome\.org/)
