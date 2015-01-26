@@ -4,6 +4,9 @@
 require "pathname"
 require "open-uri"
 
+# brew
+require "version"
+
 # need to be installed with "gem"
 require "nokogiri"
 
@@ -20,8 +23,9 @@ module BrewCheckUpdates
       @flags = flags
     end
 
-    def check
-      Dir["#{@prefix}/*.rb"].each { |p| check_formula p }
+    def check(formulae=[])
+      pattern = formulae.empty? ? "*" : "{#{formulae * ","}}"
+      Dir["#{@prefix}/#{pattern}.rb"].each { |p| check_formula p }
     end
 
     private
@@ -32,14 +36,19 @@ module BrewCheckUpdates
       name = basename.capitalize.gsub(/[-_\.](.)/) { $1.upcase } \
                                 .gsub(/\+/, "x")
 
-      require path
+      begin
+        require path
+      rescue => e
+        puts "Cannot require formula #{name}: #{e}"
+        return
+      end
       formula = Object.const_get(name)
 
       # just checking
       for name, ch in @checks
         if ch.can_check formula
           version = formula.version
-          puts "checking #{basename} (v#{version})"
+          puts "checking #{basename} (v#{version}) with #{name}"
           result = ch.check formula
           return unless result
           latest, url = result
@@ -49,44 +58,6 @@ module BrewCheckUpdates
       end
     end
 
-  end
-
-  class Version
-    include Comparable
-
-    attr_reader :major, :minor, :patch
-
-    def initialize(s)
-      @major, @minor, @patch = 0, 0, 0
-      @s = s.to_s
-
-      if @s =~ /(\d+)[-\.](\d+)(?:[-\.]r?(\d+))?/i
-        @major, @minor, @patch = $1.to_i, $2.to_i, $3.to_i
-      elsif @s =~ /v?(\d+)/
-        @major = $1.to_i
-      elsif @s =~ /(?:\w+_)?(\d+)_(\d+)/
-        @major, @minor = $1.to_i, $2.to_i
-      elsif @s =~ /(?:[rv]|rel|release-v|snapshot-)(\d+)/i
-        @major = $1.to_i
-      #else
-      #  puts "Couldn't parse #{s.inspect}"
-      end
-    end
-
-    def <=>(other)
-      r = self.major <=> other.major
-      if r == 0
-        r = self.minor <=> other.minor
-        if r == 0
-          r = self.patch <=> other.patch
-        end
-      end
-      r
-    end
-
-    def to_s
-      @s
-    end
   end
 
   module CheckDSL
@@ -208,10 +179,10 @@ module BrewCheckUpdates
   end
 
   class << self
-    def run
-      Checker.new(Check.all).check
+    def run(formulae=nil)
+      Checker.new(Check.all).check formulae
     end
   end
 end
 
-BrewCheckUpdates.run
+BrewCheckUpdates.run ARGV
