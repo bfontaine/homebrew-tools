@@ -3,12 +3,29 @@
 
 require "pathname"
 require "open-uri"
+require "net/ftp"
 
 # brew
 require "version"
 
 # need to be installed with "gem"
 require "nokogiri"
+
+module GnuFTP
+  class << self
+    @@ftp = nil
+
+    attr_reader :ftp
+
+    def connection(force=false)
+      if force || @@ftp.nil?
+        @@ftp = Net::FTP.open("ftp.gnu.org")
+        @@ftp.login
+      end
+      @@ftp
+    end
+  end
+end
 
 module BrewCheckUpdates
 
@@ -44,15 +61,15 @@ module BrewCheckUpdates
       end
       formula = Object.const_get(name)
 
-      # just checking
       for name, ch in @checks
         if ch.can_check formula
           version = formula.version
-          puts "checking #{basename} (v#{version}) with #{name}"
+          #puts "checking #{basename} (v#{version}) with #{name}"
           result = ch.check formula
-          return unless result
-          latest, url = result
-          puts "--> found #{latest}: #{url}"
+          if result
+            latest, url = result
+            puts "(#{name}) #{formula.name} #{version} -> #{latest}: #{url}"
+          end
           return
         end
       end
@@ -77,10 +94,6 @@ module BrewCheckUpdates
         Nokogiri::HTML(open(url))
       rescue
       end
-    end
-
-    def latest_version versions
-      versions.map { |v| Version.new(v) }.sort[-1]
     end
 
     class << self
@@ -112,69 +125,90 @@ module BrewCheckUpdates
 
       return if page.nil?
 
-      # take only the first tag/release in the page
       tags = [".tag-name", ".tag-references .css-truncate-target"].map do |t|
         page.css(t).first
-      end.compact.map(&:text)
+      end.compact.map { |t| Version::parse(t.text) }
 
-      current = Version.new formula.version
-      latest = latest_version tags
+      current = formula.version
+      latest = tags.select { |v| v > current }.sort.last
 
-      latest_url = "#{repo}archive/#{latest}.tar.gz"
-
-      return if current == latest or latest_url == url or latest.nil? or
-        url =~ %r(^#{repo}releases/download/#{latest}/)
-
-      [latest, latest_url]
+      unless latest.nil?
+        latest_url = "#{repo}archive/#{latest}.tar.gz"
+        [latest, latest_url]
+      end
     end
   end
 
-  class SourceForgeCheck < Check
-    name "SourceForge"
+  #class SourceForgeCheck < Check
+  #  name "SourceForge"
+
+  #  def can_check formula
+  #    formula.stable.url =~ %r(^https?://downloads\.sourceforge\.net/)
+  #  end
+
+  #  def check formula
+  #    # TODO
+  #  end
+  #end
+
+  #class GoogleCodeCheck < Check
+  #  name "Google Code"
+
+  #  def can_check formula
+  #    formula.stable.url =~ %r(^https?://code\.google\.com/) or
+  #      formula.stable.url =~ %r(^https?://[-\w]+\.googlecode\.com/)
+  #  end
+
+  #  def check formula
+  #    # TODO
+  #  end
+  #end
+
+  #class BitBucketCheck < Check
+  #  name "BitBucket"
+
+  #  def can_check formula
+  #    formula.stable.url =~ %r(^https?://bitbucket\.org/)
+  #  end
+
+  #  def check formula
+  #    # TODO
+  #  end
+  #end
+
+  class GnuFtp < Check
+    name "GNU FTP"
 
     def can_check formula
-      formula.stable.url =~ %r(^https?://downloads\.sourceforge\.net/)
+      formula.stable.url =~ %r(^http://ftpmirror\.gnu\.org/$)
     end
 
     def check formula
-      # TODO
-    end
-  end
+      name = formula.name
+      version = formula.version
+      url = URI::parse(formula.stable.url)
+      co = GnuFTP.connection
 
-  class GoogleCodeCheck < Check
-    name "Google Code"
+      dir = url.path.split("/")[1]
 
-    def can_check formula
-      formula.stable.url =~ %r(^https?://code\.google\.com/) or
-        formula.stable.url =~ %r(^https?://[-\w]+\.googlecode\.com/)
-    end
+      co.chdir("/gnu/#{dir}")
 
-    def check formula
-      # TODO
-    end
-  end
+      files = co.list("#{name}*").map { |l| l.split(/\s+/).last }.select do |s|
+        # add more checks here if there are false positives
+        [/\.sig$/, /\.diff/, /\.patch/].all? { |r| s !~ r }
+      end
 
-  class BitBucketCheck < Check
-    name "BitBucket"
+      candidates = files.map { |s| [s, Version::parse(s)] }
+      candidates.select! do |_, v|
+        v > version
+      end
+      candidate = candidates.sort_by!(&:last).last
 
-    def can_check formula
-      formula.stable.url =~ %r(^https?://bitbucket\.org/)
-    end
+      if candidate
+        new_url = "#{url.scheme}://#{url.host}/#{dir}/#{archive}"
 
-    def check formula
-      # TODO
-    end
-  end
-
-  class GnomeFtp < Check
-    name "GNOME FTP"
-
-    def can_check formula
-      formula.stable.url =~ %r(^http://ftp\.gnome\.org/)
-    end
-
-    def check formula
-      # TODO
+        [candidate[1], new_url]
+      end
     end
   end
 
@@ -185,4 +219,5 @@ module BrewCheckUpdates
   end
 end
 
-BrewCheckUpdates.run ARGV
+# run
+BrewCheckUpdates.run ARGV if $0 =~ /checkupdates/
