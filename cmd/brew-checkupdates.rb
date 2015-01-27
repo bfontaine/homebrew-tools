@@ -151,19 +151,6 @@ module BrewCheckUpdates
   #  end
   #end
 
-  #class GoogleCodeCheck < Check
-  #  name "Google Code"
-
-  #  def can_check formula
-  #    formula.stable.url =~ %r(^https?://code\.google\.com/) or
-  #      formula.stable.url =~ %r(^https?://[-\w]+\.googlecode\.com/)
-  #  end
-
-  #  def check formula
-  #    # TODO
-  #  end
-  #end
-
   #class BitBucketCheck < Check
   #  name "BitBucket"
 
@@ -180,11 +167,11 @@ module BrewCheckUpdates
     name "GNU FTP"
 
     def can_check formula
-      formula.stable.url =~ %r(^http://ftpmirror\.gnu\.org/$)
+      formula.stable.url =~ %r(^http://ftpmirror\.gnu\.org/)
     end
 
     def check formula
-      name = formula.name
+      name = formula.name.downcase
       version = formula.version
       url = URI::parse(formula.stable.url)
       co = GnuFTP.connection
@@ -205,9 +192,9 @@ module BrewCheckUpdates
       candidate = candidates.sort_by!(&:last).last
 
       if candidate
-        new_url = "#{url.scheme}://#{url.host}/#{dir}/#{archive}"
+        new_url = "#{url.scheme}://#{url.host}/#{dir}/#{candidate.first}"
 
-        [candidate[1], new_url]
+        [candidate.last, new_url]
       end
     end
   end
