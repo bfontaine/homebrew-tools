@@ -192,9 +192,10 @@ module BrewCheckUpdates
       candidate = candidates.sort_by!(&:last).last
 
       if candidate
-        new_url = "#{url.scheme}://#{url.host}/#{dir}/#{candidate.first}"
+        archive, version = candidate
+        new_url = "#{url.scheme}://#{url.host}/#{dir}/#{archive}"
 
-        [candidate.last, new_url]
+        [version, new_url]
       end
     end
   end
