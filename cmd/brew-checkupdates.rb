@@ -127,7 +127,7 @@ module BrewCheckUpdates
 
       tags = [".tag-name", ".tag-references .css-truncate-target"].map do |t|
         page.css(t).first
-      end.compact.map { |t| Version::parse(t.text) }
+      end.compact.map { |t| Version::parse(t.text) }.compact
 
       current = formula.version
       latest = tags.select { |v| v > current }.sort.last
@@ -220,4 +220,4 @@ module BrewCheckUpdates
 end
 
 # run
-BrewCheckUpdates.run ARGV if $0 =~ /checkupdates/
+BrewCheckUpdates.run ARGV
