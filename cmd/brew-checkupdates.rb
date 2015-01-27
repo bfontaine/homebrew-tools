@@ -187,7 +187,7 @@ module BrewCheckUpdates
 
       candidates = files.map { |s| [s, Version::parse(s)] }
       candidates.select! do |_, v|
-        v > version
+        !v.nil? && v > version
       end
       candidate = candidates.sort_by!(&:last).last
 
