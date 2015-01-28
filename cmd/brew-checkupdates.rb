@@ -182,7 +182,7 @@ module BrewCheckUpdates
 
       files = co.list("#{name}*").map { |l| l.split(/\s+/).last }.select do |s|
         # add more checks here if there are false positives
-        [/\.sig$/, /\.diff/, /\.patch/].all? { |r| s !~ r }
+        [/\.sig$/, /\.asc$/, /\.diff/, /\.patch/].all? { |r| s !~ r }
       end
 
       candidates = files.map { |s| [s, Version::parse(s)] }
