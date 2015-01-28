@@ -1,0 +1,5 @@
+#! /bin/bash -e
+
+# brew source-fetch: alias for brew fetch --build-from-source
+#
+brew fetch --build-from-source $*
