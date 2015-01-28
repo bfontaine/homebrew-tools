@@ -20,7 +20,7 @@ the Homebrew repo.
 * `brew fixup <formula> <change>`: use it when you’ve modified a formula after
   `brew done`.
 * `brew checkupdates [<formula> ...]`: check for formulae updates. It only
-  supports GitHub-hosted formulae for now.
+  supports GitHub and GNU FTP -hosted formulae for now.
 * `brew random <n>`: prints `<n>` random formulae from the core repo (default
   is 5).
 * `brew source-fetch`, `brew source-install`: aliases to, respectively
