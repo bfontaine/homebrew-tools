@@ -32,10 +32,7 @@ module BrewCheckUpdates
   class Checker
 
     def initialize(checks, **flags)
-      homebrew_prefix = Object.const_defined?("HOMEBREW_PREFIX") \
-                          ? HOMEBREW_PREFIX : "/usr/local"
-
-      @prefix = "#{homebrew_prefix}/Library/Formula"
+      @prefix = "#{HOMEBREW_PREFIX}/Library/Formula"
       @checks = checks.map { |c| [c.name, c.new] }
       @flags = flags
     end
@@ -111,15 +108,11 @@ module BrewCheckUpdates
   class GitHubCheck < Check
     name "GitHub"
 
-    @@gh_re = %r(^(https?://github\.com/.+?/.+?/))
-
     def can_check formula
-      formula.stable.url =~ @@gh_re
+      formula.stable.url =~ %r(^(https?://github\.com/.+?/.+?/))
     end
 
     def check formula
-      url = formula.stable.url
-      return unless url =~ @@gh_re
       repo = $1
       page = get_page "#{repo}releases"
 
@@ -138,30 +131,6 @@ module BrewCheckUpdates
       end
     end
   end
-
-  #class SourceForgeCheck < Check
-  #  name "SourceForge"
-
-  #  def can_check formula
-  #    formula.stable.url =~ %r(^https?://downloads\.sourceforge\.net/)
-  #  end
-
-  #  def check formula
-  #    # TODO
-  #  end
-  #end
-
-  #class BitBucketCheck < Check
-  #  name "BitBucket"
-
-  #  def can_check formula
-  #    formula.stable.url =~ %r(^https?://bitbucket\.org/)
-  #  end
-
-  #  def check formula
-  #    # TODO
-  #  end
-  #end
 
   class GnuFtp < Check
     name "GNU FTP"
