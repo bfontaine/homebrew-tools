@@ -108,12 +108,14 @@ module BrewCheckUpdates
   class GitHubCheck < Check
     name "GitHub"
 
+    @@gh_re = %r(^https?://github\.com/.+?/.+?/)
+
     def can_check formula
-      formula.stable.url =~ %r(^(https?://github\.com/.+?/.+?/))
+      formula.stable.url =~ @@gh_re
     end
 
     def check formula
-      repo = $1
+      repo = formula.stable.url[@@gh_re]
       page = get_page "#{repo}releases"
 
       return if page.nil?
