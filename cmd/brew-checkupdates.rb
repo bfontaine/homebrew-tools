@@ -171,6 +171,20 @@ module BrewCheckUpdates
     end
   end
 
+  class GoogleCodeCheck < Check
+    name "Google Code"
+
+    def can_check formula
+      formula.stable.url =~ /googlecode\.com/
+    end
+
+    def check formula
+      # Google Code doesn't allow new code uploads so we can't find new
+      # versions.
+      nil
+    end
+  end
+
   class << self
     def run(formulae=nil)
       Checker.new(Check.all).check formulae
