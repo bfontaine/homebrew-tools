@@ -1,8 +1,9 @@
 #! /usr/bin/env ruby
 # -*- coding: UTF-8 -*-
 
-require "open-uri"
 require "net/ftp"
+require "open-uri"
+require "pathname"
 
 # brew
 require "formula"
@@ -32,21 +33,20 @@ module BrewCheckUpdates
   class Checker
 
     def initialize(checks, **flags)
-      @prefix = "#{HOMEBREW_PREFIX}/Library/Formula"
       @checks = checks.map { |c| [c.name, c.new] }
       @flags = flags
     end
 
     def check(formulae=[])
-      pattern = formulae.empty? ? "*" : "{#{formulae * ","}}"
-      Dir["#{@prefix}/#{pattern}.rb"].each { |p| check_formula p }
+      (formulae.empty? ? Formula : formulae.map {|f| Formula[f] }).each do |f|
+        check_formula f
+      end
     end
 
     private
 
-    def check_formula path
-      return if File.symlink? path # no tap for now
-      formula = Formula[path]
+    def check_formula formula
+      return if formula.tap? # no tap for now
 
       for name, ch in @checks
         if ch.can_check formula
@@ -92,6 +92,23 @@ module BrewCheckUpdates
       end
     end
 
+    def latest_version formula, candidates
+      best = {:name => nil, :version => formula.stable.version}
+      nope = [/\.sig$/, /\.asc$/, /\.diff/, /\.patch/, /win32/, /mingw32/]
+
+      candidates.each do |s|
+        next if nope.any? { |r| s =~ r }
+
+        v = Version::parse(s)
+
+        if v && v > best[:version]
+          best[:name], best[:version] = s, v
+        end
+      end
+
+      best.values_at(:name, :version)
+    end
+
     class << self
       def inherited child
         @checks ||= []
@@ -116,15 +133,11 @@ module BrewCheckUpdates
 
       tags = [".tag-name", ".tag-references .css-truncate-target"].map do |t|
         page.css(t).first
-      end.compact.map { |t| Version::parse(t.text) }.compact
+      end.compact.map(&:text)
 
-      current = formula.version
-      latest = tags.select { |v| v > current }.sort.last
+      latest, version = latest_version formula, tags
 
-      unless latest.nil?
-        latest_url = "#{repo}archive/#{latest}.tar.gz"
-        [latest, latest_url]
-      end
+      [version, "#{repo}archive/#{latest}.tar.gz"] if latest
     end
   end
 
@@ -142,23 +155,11 @@ module BrewCheckUpdates
 
       co.chdir("/gnu/#{dir}")
 
-      files = co.list("#{name}*").map { |l| l.split(/\s+/).last }.select do |s|
-        # add more checks here if there are false positives
-        [/\.sig$/, /\.asc$/, /\.diff/, /\.patch/].all? { |r| s !~ r }
-      end
+      files = co.list("#{name}*").map { |l| l.split(/\s+/).last }
 
-      candidates = files.map { |s| [s, Version::parse(s)] }
-      candidates.select! do |_, v|
-        !v.nil? && v > version
-      end
-      candidate = candidates.sort_by!(&:last).last
+      archive, version = latest_version formula, files
 
-      if candidate
-        archive, version = candidate
-        new_url = "#{url.scheme}://#{url.host}/#{dir}/#{archive}"
-
-        [version, new_url]
-      end
+      [version, "#{url.scheme}://#{url.host}/#{dir}/#{archive}"] if archive
     end
   end
 
