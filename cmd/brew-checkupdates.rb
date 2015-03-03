@@ -170,6 +170,24 @@ module BrewCheckUpdates
     pattern %r(googlecode\.com)
   end
 
+  class GnuSavannahCheck < Check
+    name "GNU Savannah"
+    pattern %r(^http://download\.savannah\.gnu\.org/releases/.)
+
+    def check formula
+      name_re = /^#{formula.name}-/
+      url = Pathname.new(formula.stable.url).dirname.to_s
+      page = get_page url
+      return if page.nil?
+
+      files = page.css("td a[href]").map(&:text).select { |t| t =~ name_re }
+
+      archive, version = latest_version formula, files
+
+      [version, "#{url}/#{archive}"] if archive
+    end
+  end
+
   class << self
     def run(formulae=nil)
       Checker.new(Check.all).check formulae
