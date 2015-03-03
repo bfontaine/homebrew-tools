@@ -1,11 +1,11 @@
 #! /usr/bin/env ruby
 # -*- coding: UTF-8 -*-
 
-require "pathname"
 require "open-uri"
 require "net/ftp"
 
 # brew
+require "formula"
 require "version"
 
 # need to be installed with "gem"
@@ -46,17 +46,7 @@ module BrewCheckUpdates
 
     def check_formula path
       return if File.symlink? path # no tap for now
-      basename = Pathname.new(path).basename.to_s.sub(/\.rb$/, "")
-      name = basename.capitalize.gsub(/[-_\.](.)/) { $1.upcase } \
-                                .gsub(/\+/, "x")
-
-      begin
-        require path
-      rescue => e
-        puts "Cannot require formula #{name}: #{e}"
-        return
-      end
-      formula = Object.const_get(name)
+      formula = Formula[path]
 
       for name, ch in @checks
         if ch.can_check formula
@@ -78,13 +68,22 @@ module BrewCheckUpdates
     def name s=nil
       @name = s || @name
     end
+
+    def pattern p=nil
+      @pattern = p || @pattern
+    end
   end
 
   class Check
     extend CheckDSL
 
-    def can_check formula; end
+    def can_check formula
+      pattern && formula.stable.url =~ pattern
+    end
+
     def check formula; end
+
+    def pattern;self.class.pattern;end
 
     def get_page url
       begin
@@ -107,15 +106,10 @@ module BrewCheckUpdates
 
   class GitHubCheck < Check
     name "GitHub"
-
-    @@gh_re = %r(^https?://github\.com/.+?/.+?/)
-
-    def can_check formula
-      formula.stable.url =~ @@gh_re
-    end
+    pattern %r(^https?://github\.com/.+?/.+?/)
 
     def check formula
-      repo = formula.stable.url[@@gh_re]
+      repo = formula.stable.url[pattern]
       page = get_page "#{repo}releases"
 
       return if page.nil?
@@ -136,10 +130,7 @@ module BrewCheckUpdates
 
   class GnuFtp < Check
     name "GNU FTP"
-
-    def can_check formula
-      formula.stable.url =~ %r(^http://ftpmirror\.gnu\.org/)
-    end
+    pattern %r(^http://ftpmirror\.gnu\.org/)
 
     def check formula
       name = formula.name.downcase
@@ -171,18 +162,11 @@ module BrewCheckUpdates
     end
   end
 
+  # Since Google Code doesn't allow new code uploads we can't find new
+  # versions. This class is an empty trap for the Google Code formulae.
   class GoogleCodeCheck < Check
     name "Google Code"
-
-    def can_check formula
-      formula.stable.url =~ /googlecode\.com/
-    end
-
-    def check formula
-      # Google Code doesn't allow new code uploads so we can't find new
-      # versions.
-      nil
-    end
+    pattern %r(googlecode\.com)
   end
 
   class << self
