@@ -37,8 +37,17 @@ module BrewCheckUpdates
       @flags = flags
     end
 
-    def check(formulae=[])
-      (formulae.empty? ? Formula : formulae.map {|f| Formula[f] }).each do |f|
+    def all_formulae
+      # we don't support taps for now
+      Formula.select { |f| !f.tap? }
+    end
+
+    def formulae(names)
+      names.map {|f| Formula[f] }
+    end
+
+    def check(names=[])
+      (formulae.empty? ? all_formulae : formulae(names)).each do |f|
         check_formula f
       end
     end
