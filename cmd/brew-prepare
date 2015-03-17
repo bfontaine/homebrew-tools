@@ -10,7 +10,7 @@ __brew_prepare() {
 
   brew home $formula
   brew desc $formula 2>/dev/null || true
-  brew style --fix $formula || true
+  brew fix $formula || true
   brew audit --strict $formula || true
   echo "(press enter to edit this formula)"
   read
