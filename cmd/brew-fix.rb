@@ -6,6 +6,7 @@
 # formula:
 #  - remove any `require "formula"` at the top
 #  - replace the stable checksum with a sha256 if it's not already one
+#  - replace `system "make install"` with `system "make", "install"`
 
 class Pathname
   def write! s
@@ -48,9 +49,14 @@ class FormulaFixer
     remove!(/^require ["']formula["']\n+/)
   end
 
+  def fix_make_install
+    replace!(/^(\s+)system "make install"$/, %(\\1system "make", "install"))
+  end
+
   def fix!
     fix_checksum
     fix_required
+    fix_make_install
     write!
   end
 end
