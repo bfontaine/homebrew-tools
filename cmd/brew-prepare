@@ -8,6 +8,11 @@
 __brew_prepare() {
   local formula=$1
 
+  if [ -z "$formula" ]; then
+    echo "Usage: brew prepare <formula>"
+    exit 1
+  fi
+
   brew home $formula
   brew desc $formula 2>/dev/null || true
   brew fix $formula || true
