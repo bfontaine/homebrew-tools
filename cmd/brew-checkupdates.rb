@@ -47,7 +47,7 @@ module BrewCheckUpdates
     end
 
     def check(names=[])
-      (formulae.empty? ? all_formulae : formulae(names)).each do |f|
+      (names.empty? ? all_formulae : formulae(names)).each do |f|
         check_formula f
       end
     end
