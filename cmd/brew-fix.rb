@@ -35,7 +35,7 @@ class FormulaFixer
 
   def fix_checksum
     chk = @f.stable.checksum
-    return if chk.hash_type == :sha256
+    return if !chk || chk.hash_type == :sha256
 
     # from cmd/fetch
     download = @f.fetch
