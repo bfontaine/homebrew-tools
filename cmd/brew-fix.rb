@@ -50,9 +50,7 @@ class FormulaFixer
   end
 
   def fix_make_install
-    %w[install macosx check].each do |t|
-      replace!(/^(\s+)system "make #{t}"$/, %(\\1system "make", "#{t}"))
-    end
+    replace!(/^(\s+)system "make ([a-z]+)"$/, %(\\1system "make", "\\2"))
   end
 
   def fix!
