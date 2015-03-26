@@ -1,12 +1,18 @@
 # -*- coding: UTF-8 -*-
 
 # Note: this is experimental, use it at your own risk!
-# 
+#
 # This is an extension to `brew style --fix` which runs more actions on the
 # formula:
 #  - remove any `require "formula"` at the top
 #  - replace the stable checksum with a sha256 if it's not already one
 #  - replace `system "make install"` with `system "make", "install"`
+
+require "fileutils"
+
+# from Homebrew
+require "utils"
+require "extend/pathname"
 
 class Pathname
   def write! s
@@ -15,6 +21,8 @@ class Pathname
 end
 
 class FormulaFixer
+  include FileUtils
+
   def initialize(f)
     system "brew", "style", "--fix", f.name
     @f = f
@@ -31,6 +39,37 @@ class FormulaFixer
 
   def write!
     @f.path.write! @source
+  end
+
+  def fix_url_https(http)
+    # see https://gist.github.com/vszakats/663dc8ccf1d49b903f8e
+    return unless http && http =~ %r(^http://) && http !~ %r(\.git$)
+
+    https = http.sub(/^http:/, "https:")
+
+    has_https = mktemp("brew-fix-https") do
+      curl http, "-s", "--connect-timeout", "2", "-o", "http"
+
+      begin
+        curl https, "-s", "--connect-timeout", "2", "-o", "https"
+      rescue ErrorDuringExecution
+        false
+      else
+        Pathname.new("http").sha256 == Pathname.new("https").sha256
+      end
+    end
+
+    if has_https
+      replace! http, https
+    end
+  end
+
+  def fix_https
+    urls = [@f.homepage, @f.stable.url] + @f.stable.mirrors
+    urls << @f.head.url if @f.head
+    urls.each do |url|
+      fix_url_https url
+    end
   end
 
   def fix_common_https_urls
@@ -90,6 +129,7 @@ class FormulaFixer
     fix_make_install
     fix_deps
     fix_common_https_urls
+    fix_https
     write!
   end
 end
