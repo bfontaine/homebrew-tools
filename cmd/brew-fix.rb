@@ -33,6 +33,37 @@ class FormulaFixer
     @f.path.write! @source
   end
 
+  def fix_common_https_urls
+    [
+      %r[github\.com/],
+      %r[code\.google\.com/],
+      %r[(?:www|ftp)\.gnu\.org/],
+      %r[(?:(?:trac|tools|www)\.)?ietf\.org],
+      %r[(?:www\.)?gnupg\.org/],
+      %r[wiki\.freedesktop\.org],
+      %r[packages\.debian\.org],
+      %r[[^/]*github\.io/],
+      %r[[^/]*\.apache\.org],
+      %r[fossies\.org/],
+      %r[mirrors\.kernel\.org/],
+      %r[([^/]*\.|)bintray\.com/],
+      %r[tools\.ietf\.org/],
+    ].each do |domain|
+      replace!(%r[["']http://(#{domain})], %("https://\\1))
+    end
+  end
+
+  def fix_deps
+    %w[git ruby].each do |dep|
+      remove!(/^\s+depends_on\s+["']#{dep}["']\n+/)
+    end
+
+    {"mercurial" => ":hg", "gfortran" => ":fortran"}.each do |bad, good|
+      good = "\"#{good}\"" unless good =~ /^:/
+      replace!(/^(\s+depends_on)\s+["']#{bad}["']$/, %(\\1 #{good}))
+    end
+  end
+
   def fix_checksum
     chk = @f.stable.checksum
     return if !chk || chk.hash_type == :sha256
@@ -57,6 +88,8 @@ class FormulaFixer
     fix_checksum
     fix_required
     fix_make_install
+    fix_deps
+    fix_common_https_urls
     write!
   end
 end
