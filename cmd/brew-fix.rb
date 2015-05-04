@@ -65,11 +65,16 @@ class FormulaFixer
   end
 
   def fix_checksum
-    chk = @f.stable.checksum
+    fix_resource_checksum @f.stable
+    @f.resources.each { |r| fix_resource_checksum(r) }
+  end
+
+  def fix_resource_checksum(res)
+    chk = res.checksum
     return if !chk || chk.hash_type == :sha256
 
     # from cmd/fetch
-    download = @f.fetch
+    download = res.fetch
     return unless download.file?
 
     replace!(/#{chk.hash_type} ["']#{chk.hexdigest}["']/,
