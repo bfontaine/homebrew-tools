@@ -1,6 +1,6 @@
 # Homebrew Tools
 
-This repository is an [Homebrew](http://brew.sh) tap for a set of
+This repository is a personal [Homebrew](http://brew.sh) tap for a set of
 [external commands][ext] useful for contributing.
 
 [ext]: https://github.com/Homebrew/homebrew/blob/master/share/doc/homebrew/External-Commands.md#external-commands
@@ -8,6 +8,9 @@ This repository is an [Homebrew](http://brew.sh) tap for a set of
 This is a work in progress. I wrote these scripts to automate some of the work
 I used to do manually when upgrading formulae and submitting pull requests to
 the Homebrew repo.
+
+Note: this intended as a *personal* tools set, expect things to be broken and
+documentation to be outdated.
 
 ## Usage
 
