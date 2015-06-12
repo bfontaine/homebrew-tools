@@ -24,8 +24,6 @@ documentation to be outdated.
   supports GitHub and GNU FTP -hosted formulae for now.
 * `brew random <n>`: prints `<n>` random formulae from the core repo (default
   is 5).
-* `brew source-fetch`, `brew source-install`: aliases to, respectively
-  `brew fetch` and `brew install` with the `--build-from-source` option.
 * `brew-fix`: fix some common formulae problems
 
 All tools assume your local repo is up to date (i.e. you run `brew

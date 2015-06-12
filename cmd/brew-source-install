@@ -1,5 +1,0 @@
-#! /bin/bash -e
-
-# brew source-install: alias for brew install --build-from-source --debug
-#
-brew install --build-from-source --debug $*
