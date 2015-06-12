@@ -22,8 +22,6 @@ documentation to be outdated.
   single word describing the change (e.g. `1.0.3`, `head`, `test`, etc).
 * `brew checkupdates [<formula> ...]`: check for formulae updates. It only
   supports GitHub and GNU FTP -hosted formulae for now.
-* `brew random <n>`: prints `<n>` random formulae from the core repo (default
-  is 5).
 * `brew-fix`: fix some common formulae problems
 
 All tools assume your local repo is up to date (i.e. you run `brew
@@ -39,6 +37,3 @@ Tap this repository:
 ### Dependencies
 
 * `brew-checkupdates` requires `nokogiri`: `gem install nokogiri`
-* `brew-random` requires [`brew-desc`][desc]: `brew tap telemachus/desc`
-
-[desc]: https://github.com/telemachus/homebrew-desc
