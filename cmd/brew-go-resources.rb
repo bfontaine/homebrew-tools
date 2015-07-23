@@ -21,8 +21,9 @@ class GoDep
       @using = ":hg"
     when %r[^sourcegraph\.com/(.+)]
       @url = "https://github.com/#{$1}.git"
-    when %r[^golang\.org/x/([^/]+)]
-      @url = "https://go.googlesource.com/#{$1}.git"
+    when %r[^(golang\.org/x/([^/]+))]
+      @path = $1
+      @url = "https://go.googlesource.com/#{$2}.git"
     when %r[^gopkg\.in/]
       @url = "https://#{@path}.git"
     when %r[^(google\.golang\.org/api)(?:/.+)]
@@ -37,11 +38,11 @@ class GoDep
     end
   end
 
-  def to_resource; <<-EOS.undent
-      go_resource "#{@path}" do
-        url "#{@url}",
-          :revision => "#{@revision}"#{", :using => #{@using}" if @using}
-      end
+  def to_resource; <<-EOS
+  go_resource "#{@path}" do
+    url "#{@url}",
+      :revision => "#{@revision}"#{", :using => #{@using}" if @using}
+  end
     EOS
   end
 end
