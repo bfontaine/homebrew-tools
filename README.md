@@ -5,12 +5,14 @@ This repository is a personal [Homebrew](http://brew.sh) tap for a set of
 
 [ext]: https://github.com/Homebrew/homebrew/blob/master/share/doc/homebrew/External-Commands.md#external-commands
 
-This is a work in progress. I wrote these scripts to automate some of the work
+This is a work in constant progress. I wrote these scripts to automate some of the work
 I used to do manually when upgrading formulae and submitting pull requests to
 the Homebrew repo.
 
 Note: this intended as a *personal* tools set, expect things to be broken and
 documentation to be outdated.
+
+For a more general toolset, see [homebrew/dev-tools](https://github.com/Homebrew/homebrew-dev-tools).
 
 ## Usage
 
@@ -22,7 +24,6 @@ documentation to be outdated.
   single word describing the change (e.g. `1.0.3`, `head`, `test`, etc).
 * `brew checkupdates [<formula> ...]`: check for formulae updates. It only
   supports GitHub and GNU FTP -hosted formulae for now.
-* `brew-fix`: fix some common formulae problems
 
 All tools assume your local repo is up to date (i.e. you run `brew
 update` regularly). I’m not responsible if you break your installation when
