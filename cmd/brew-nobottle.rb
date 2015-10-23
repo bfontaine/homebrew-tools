@@ -21,6 +21,7 @@ Formula.full_names.reject { |name| name.include? "/" }.each do |name|
   install_fn = f.path.read[/  def install\n.*?\n  end/m]
 
   next if compile.any? { |step| install_fn =~ step }
+  next if install_fn.include? "ENV.cc"
 
   puts f.name
 end
