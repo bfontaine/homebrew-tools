@@ -8,7 +8,7 @@ require "formula"
 
 compile = %w[make ./configure gcc cc].map { |cmd| /system "#{cmd}"/ }
 
-Formula.full_names.reject { |name| name.include? "/" }.each do |name|
+Formula.core_files.each do |name|
   f = Formula[name]
   next if f.bottle || !f.bottle_specification.collector.keys.empty?
   next if f.bottle_disabled? || f.bottle_unneeded?
