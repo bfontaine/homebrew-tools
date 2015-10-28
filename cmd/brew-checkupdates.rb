@@ -39,7 +39,7 @@ module BrewCheckUpdates
 
     def all_formulae
       # we don't support taps for now
-      Formula.select { |f| !f.tap? }
+      Formula.core_files.map { |f| Formula[f] }
     end
 
     def formulae(names)
@@ -169,6 +169,8 @@ module BrewCheckUpdates
       archive, version = latest_version formula, files
 
       [version, "#{url.scheme}://#{url.host}/#{dir}/#{archive}"] if archive
+    rescue => e
+      opoo "#{name}: #{e}"
     end
   end
 
