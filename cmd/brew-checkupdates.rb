@@ -60,6 +60,10 @@ module BrewCheckUpdates
       for name, ch in @checks
         if ch.can_check formula
           version = formula.version
+          # we can't easily detect updates when a version can't be parsed from
+          # the URL
+          next unless version.detected_from_url?
+
           #puts "checking #{basename} (v#{version}) with #{name}"
           result = ch.check formula
           if result
