@@ -57,13 +57,14 @@ module BrewCheckUpdates
     def check_formula formula
       return if formula.tap? # no tap for now
 
+      version = formula.version
+
+      # we can't easily detect updates when a version can't be parsed from
+      # the URL
+      return unless version.detected_from_url?
+
       for name, ch in @checks
         if ch.can_check formula
-          version = formula.version
-          # we can't easily detect updates when a version can't be parsed from
-          # the URL
-          next unless version.detected_from_url?
-
           #puts "checking #{basename} (v#{version}) with #{name}"
           result = ch.check formula
           if result
