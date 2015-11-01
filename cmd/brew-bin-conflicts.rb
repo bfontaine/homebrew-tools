@@ -1,4 +1,15 @@
 # -*- coding: UTF-8 -*-
+#
+# brew-bin-conflicts
+# ------------------
+#
+# Author: Baptiste Fontaine
+#
+# Usage:
+#   brew bin-conflicts [--commit]
+#
+# It'll detect all missing conflicts and add them to the formulae. It'll commit
+# them if called with --commit. Only the core is supported for now.
 
 require "cmd/tap"
 
