@@ -27,10 +27,9 @@ end
 conflicts.select! do |_, c|
   next false if c.size == 1
 
-  # FIXME
-  c.all? do |c1|
+  c.any? do |c1|
     cs = c - [c1]
-    (cs & registered_conflicts[c1]) == cs
+    (cs & registered_conflicts[c1]) != cs
   end
 end
 
@@ -47,8 +46,8 @@ binaries.each do |name, bins|
   regconfs = registered_conflicts[name]
 
   bins.each do |bin|
-    conflicts[bin].delete name
     conflicts[bin].each do |name2|
+      next if name == name2
       next if regconfs.include? name2
 
       conflicting_names[name2] ||= []
@@ -57,8 +56,7 @@ binaries.each do |name, bins|
   end
 
   unless conflicting_names.empty?
-    ohai name
-    conflicting_names.each do |n, bs|
+    lines = conflicting_names.map do |n, bs|
       cause = case bs.size
               when 1
                 "both install `#{bs[0]}` binaries"
@@ -68,7 +66,21 @@ binaries.each do |name, bins|
                 "both install the same binaries"
               end
 
-      puts %(conflicts_with "#{n}", :because => "#{cause}")
+      line = %(  conflicts_with "#{n}", :because => "#{cause}")
+      next line if line.length < 80
+      %(  conflicts_with "#{n}",\n    :because => "#{cause}")
+    end.join("\n")
+
+    ohai name
+    p = Formula[name].path
+    content = p.read.sub(/\n\n  def install$/, "\n\n#{lines}\n\n  def install")
+    p.open("w") { |f| f.write content }
+    if ARGV.include? "--commit"
+      FileUtils.cd HOMEBREW_PREFIX do
+        msg = "#{name}: conflicts with #{conflicting_names.keys * ", "}"
+        system "git", "add", p.to_s
+        system "git", "commit", "-m", msg
+      end
     end
   end
 end
