@@ -17,8 +17,10 @@ FileUtils.cd versions_tap.path do
     next unless origin.desc
     next if "#{f.full_name}: #{origin.desc}".size >= 80
 
+    class_name = f.name.gsub(/[-_]([a-z])/) { $1.upcase }.capitalize
+
     content = f.path.read
-    content.gsub!(/^(class [^\n]+)\n/, %(\\1\n  desc "#{origin.desc}"\n))
+    content.gsub!(/^(class #{class_name} < [^\n]+)\n/, %(\\1\n  desc "#{origin.desc}"\n))
     f.path.open("w") do |file|
       file.write content
     end
