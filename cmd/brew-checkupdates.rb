@@ -29,9 +29,7 @@ module GnuFTP
 end
 
 module BrewCheckUpdates
-
   class Checker
-
     def initialize(checks, **flags)
       @checks = checks.map { |c| [c.name, c.new] }
       @flags = flags
@@ -65,7 +63,6 @@ module BrewCheckUpdates
 
       for name, ch in @checks
         if ch.can_check formula
-          #puts "checking #{basename} (v#{version}) with #{name}"
           result = ch.check formula
           if result
             latest, url = result
@@ -75,7 +72,6 @@ module BrewCheckUpdates
         end
       end
     end
-
   end
 
   module CheckDSL
@@ -97,7 +93,7 @@ module BrewCheckUpdates
 
     def check formula; end
 
-    def pattern;self.class.pattern;end
+    def pattern; self.class.pattern; end
 
     def get_page url
       begin
