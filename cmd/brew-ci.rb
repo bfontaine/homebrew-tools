@@ -16,19 +16,35 @@
 require "shellwords"
 
 module HomebrewCI
+  class JobTriggerError < Exception
+
+    attr_reader :response
+
+    def initialize(response)
+      super "Job trigger error"
+      @response = response
+    end
+  end
+
   class << self
     ROOT_URL = "http://bot.brew.sh"
 
     def bottle_el_capitan(formulae)
       formulae.each do |f|
-        trigger_job("Homebrew El Capitan Testing", {:BOT_PARAMS => f.full_name})
+        begin
+          trigger_job("Homebrew El Capitan Testing", {:BOT_PARAMS => f.full_name})
+        rescue JobTriggerError => e
+          odie "Failed to trigger a job for formula '#{f}':\n#{e.response}"
+        else
+          ohai "Triggered job for formula '#{f}'"
+        end
       end
     end
 
     private
 
     def curl(*args)
-      `/usr/bin/curl -sfL #{Shellwords.join args}`
+      `/usr/bin/curl -sf #{Shellwords.join args}`
     end
 
     def curl_with_auth(*args)
@@ -53,7 +69,8 @@ module HomebrewCI
         url << "/buildWithParameters?#{URI.encode_www_form params}"
       end
 
-      curl_with_auth "-XPOST", url
+      resp = curl_with_auth "-XPOST", "-i", url
+      raise JobTriggerError.new(resp) unless resp.include? "201 Created"
     end
   end
 end
