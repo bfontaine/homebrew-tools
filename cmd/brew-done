@@ -18,7 +18,7 @@ __brew_done() {
   local open_cmd=
   local tmp=/tmp/brew_done.tmp$RANDOM
 
-  [ -z "$BREW_DONE_SKIP_AUDIT" ] && brew audit --strict $formula
+  [ -z "$BREW_DONE_SKIP_AUDIT" ] && brew audit --strict --online $formula
 
   cd $HOMEBREW_PREFIX/Library/Taps/homebrew/homebrew-core
   git checkout -b "${formula}-${change}" master
