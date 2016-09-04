@@ -1,0 +1,5 @@
+#! /bin/bash
+#
+# Equivalent of brew-test that runs in a noninterative session (like the CI).
+#
+ssh localhost $(brew --prefix)/bin/brew test $*
