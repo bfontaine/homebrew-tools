@@ -20,7 +20,7 @@ __brew_done() {
 
   [ -z "$BREW_DONE_SKIP_AUDIT" ] && brew audit --strict --online $formula
 
-  cd $HOMEBREW_PREFIX/Library/Taps/homebrew/homebrew-core
+  cd $(brew --repo)/Library/Taps/homebrew/homebrew-core
   git checkout -b "${formula}-${change}" master
   git add Formula/${formula}.rb
   echo "$formula: $change" >| $tmp
