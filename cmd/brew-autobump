@@ -14,7 +14,7 @@ __brew_autobump() {
 
   sha256=$(curl -sL "$url" |shasum -a 256|awk '{print $1}')
 
-  brew bump-formula-pr $formula "--url=$url" "--sha256=$sha256" --strict $*
+  brew bump-formula-pr $formula "--url=$url" "--sha256=$sha256" --audit $*
 }
 
 __brew_autobump $*
