@@ -12,22 +12,6 @@ require "version"
 # need to be installed with "gem"
 require "nokogiri"
 
-module GnuFTP
-  class << self
-    @@ftp = nil
-
-    attr_reader :ftp
-
-    def connection(force=false)
-      if force || @@ftp.nil?
-        @@ftp = Net::FTP.open("ftp.gnu.org")
-        @@ftp.login
-      end
-      @@ftp
-    end
-  end
-end
-
 module BrewCheckUpdates
   class Checker
     def initialize(checks, **flags)
@@ -148,30 +132,6 @@ module BrewCheckUpdates
       latest, version = latest_version formula, tags
 
       [version, "#{repo}archive/#{latest}.tar.gz"] if latest
-    end
-  end
-
-  class GnuFtp < Check
-    name "GNU FTP"
-    pattern %r(^http://ftpmirror\.gnu\.org/)
-
-    def check formula
-      name = formula.name.downcase
-      version = formula.version
-      url = URI::parse(formula.stable.url)
-      co = GnuFTP.connection
-
-      dir = url.path.split("/")[1]
-
-      co.chdir("/gnu/#{dir}")
-
-      files = co.list("#{name}*").map { |l| l.split(/\s+/).last }
-
-      archive, version = latest_version formula, files
-
-      [version, "#{url.scheme}://#{url.host}/#{dir}/#{archive}"] if archive
-    rescue => e
-      opoo "#{name}: #{e}"
     end
   end
 
