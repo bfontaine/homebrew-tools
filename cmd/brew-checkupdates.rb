@@ -1,7 +1,6 @@
 #! /usr/bin/env ruby
 # -*- coding: UTF-8 -*-
 
-require "net/ftp"
 require "open-uri"
 require "pathname"
 
@@ -21,14 +20,14 @@ module BrewCheckUpdates
 
     def all_formulae
       # we don't support taps for now
-      Formula.core_files.map { |f| Formula[f] }
+      formulae Formula.core_names
     end
 
     def formulae(names)
-      names.map {|f| Formula[f] }
+      names.map { |f| Formula[f] }
     end
 
-    def check(names=[])
+    def check(names = [])
       (names.empty? ? all_formulae : formulae(names)).each do |f|
         check_formula f
       end
@@ -36,9 +35,8 @@ module BrewCheckUpdates
 
     private
 
-    def check_formula formula
-      return if formula.tap? # no tap for now
-
+    def check_formula(formula)
+      ohai formula.name
       version = formula.version
 
       # we can't easily detect updates when a version can't be parsed from
@@ -59,11 +57,11 @@ module BrewCheckUpdates
   end
 
   module CheckDSL
-    def name s=nil
+    def name(s = nil)
       @name = s || @name
     end
 
-    def pattern p=nil
+    def pattern(p = nil)
       @pattern = p || @pattern
     end
   end
@@ -71,32 +69,34 @@ module BrewCheckUpdates
   class Check
     extend CheckDSL
 
-    def can_check formula
+    def can_check(formula)
       pattern && formula.stable.url =~ pattern
     end
 
-    def check formula; end
+    def check(formula); end
 
-    def pattern; self.class.pattern; end
-
-    def get_page url
-      begin
-        Nokogiri::HTML(open(url))
-      rescue
-      end
+    def pattern
+      self.class.pattern
     end
 
-    def latest_version formula, candidates
-      best = {:name => nil, :version => formula.stable.version}
+    def get_page(url)
+      Nokogiri::HTML(open(url))
+    rescue
+      nil
+    end
+
+    def latest_version(formula, candidates)
+      best = { :name => nil, :version => formula.stable.version }
       nope = [/\.sig$/, /\.asc$/, /\.diff/, /\.patch/, /win32/, /mingw32/]
 
       candidates.each do |s|
         next if nope.any? { |r| s =~ r }
 
-        v = Version::parse(s)
+        v = Version.parse(s)
 
         if v && v > best[:version]
-          best[:name], best[:version] = s, v
+          best[:name] = s
+          best[:version] = v
         end
       end
 
@@ -104,7 +104,7 @@ module BrewCheckUpdates
     end
 
     class << self
-      def inherited child
+      def inherited(child)
         @checks ||= []
         @checks << child
       end
@@ -117,9 +117,9 @@ module BrewCheckUpdates
 
   class GitHubCheck < Check
     name "GitHub"
-    pattern %r(^https?://github\.com/.+?/.+?/)
+    pattern %r{^https?://github\.com/.+?/.+?/}
 
-    def check formula
+    def check(formula)
       repo = formula.stable.url[pattern]
       page = get_page "#{repo}releases"
 
@@ -139,14 +139,14 @@ module BrewCheckUpdates
   # versions. This class is an empty trap for the Google Code formulae.
   class GoogleCodeCheck < Check
     name "Google Code"
-    pattern %r(googlecode\.com)
+    pattern /googlecode\.com/
   end
 
   class GnuSavannahCheck < Check
     name "GNU Savannah"
-    pattern %r(^http://download\.savannah\.gnu\.org/releases/.)
+    pattern %r{^http://download\.savannah\.gnu\.org/releases/.}
 
-    def check formula
+    def check(formula)
       name_re = /^#{formula.name}-/
       url = Pathname.new(formula.stable.url).dirname.to_s
       page = get_page url
@@ -161,7 +161,7 @@ module BrewCheckUpdates
   end
 
   class << self
-    def run(formulae=nil)
+    def run(formulae = nil)
       Checker.new(Check.all).check formulae
     end
   end
