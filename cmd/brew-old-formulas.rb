@@ -1,15 +1,15 @@
-#:  * `old-formulas`:
-#:    Find the top 20 oldest formulae in Homebrew's core tap by last
+#:  * `old-formulas` [--top=20] [--max-commits=30000]:
+#:    Find the top N oldest formulae in Homebrew's core tap by last
 #:    modification date.
 
-TOP = 20
-MAX_COMMITS = 15000  # arbitrary
+top_size = ARGV.value("top")&.to_i || 20
+max_commits = ARGV.value("max-commits")&.to_i || 30000
 
 (Tap.new("homebrew", "core").path/"Formula").cd do
   r, io = IO.pipe
 
   fork do
-    system("git", "log", "--name-only", "--pretty=format:%aI", "-n #{MAX_COMMITS}",
+    system("git", "log", "--name-only", "--pretty=format:%aI", "-n #{max_commits}",
            out: io)
   end
   io.close
@@ -33,7 +33,7 @@ MAX_COMMITS = 15000  # arbitrary
     last_updates[formula] ||= curr_day
   end
 
-  top = last_updates.sort_by(&:last).slice(0, TOP)
+  top = last_updates.sort_by(&:last).slice(0, top_size+1)
   max_size = top.map(&:first).map(&:length).max
   # "YYYY-MM-DD:".length = 11
   line_format = "%11s %-#{max_size}s"
