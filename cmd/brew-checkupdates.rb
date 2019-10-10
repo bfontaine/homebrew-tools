@@ -41,7 +41,7 @@ module BrewCheckUpdates
 
       # we can't easily detect updates when a version can't be parsed from
       # the URL
-      return unless version.detected_from_url?
+      return unless version.detected_from_url? || formula.name =~ /@/
 
       for name, ch in @checks
         if ch.can_check formula
