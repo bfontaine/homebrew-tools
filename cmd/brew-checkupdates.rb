@@ -87,10 +87,10 @@ module BrewCheckUpdates
 
     def latest_version(formula, candidates)
       best = { :name => nil, :version => formula.stable.version }
-      nope = [/\.sig$/, /\.asc$/, /\.diff/, /\.patch/, /win32/, /mingw32/]
+      nope = /\.(?:sig|asc)$|\.diff|\.patch|win32|mingw32|beta|alpha/
 
       candidates.each do |s|
-        next if nope.any? { |r| s =~ r }
+        next if s =~ nope
 
         v = Version.parse(s)
 
@@ -125,12 +125,8 @@ module BrewCheckUpdates
 
       return if page.nil?
 
-      tags = [".tag-name", ".tag-references .css-truncate-target"].map do |t|
-        page.css(t).first
-      end.compact.map(&:text)
-
+      tags = page.css(".release a > .css-truncate-target").map(&:text)
       latest, version = latest_version formula, tags
-
       [version, "#{repo}archive/#{latest}.tar.gz"] if latest
     end
   end
