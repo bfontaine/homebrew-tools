@@ -8,7 +8,7 @@ require "pathname"
 require "formula"
 require "version"
 
-# need to be installed with "gem"
+# installed as part of 'brew style'
 require "nokogiri"
 
 module BrewCheckUpdates
