@@ -10,9 +10,9 @@ I used to do manually when upgrading formulae and submitting pull requests to
 the Homebrew repo.
 
 Note: this intended as a *personal* tools set, expect things to be broken and
-documentation to be outdated.
+documentation to be outdated. I haven’t used most of these since I [left the Homebrew team][left] in 2017.
 
-For a more general toolset, see [homebrew/dev-tools](https://github.com/Homebrew/homebrew-dev-tools).
+[left]: https://github.com/Homebrew/brew/commit/155fe998ffdb0921c807f4e3a5e5e9909a2b240e
 
 ## Usage
 
